@@ -1,0 +1,2 @@
+#!/bin/bash
+cmake -GNinja -B build . -DLV_USE_DRAW_SDL=ON -DLV_USE_LIBPNG=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
