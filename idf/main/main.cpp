@@ -1,5 +1,6 @@
 #include "core/lv_obj_pos.h"
 #include "cyd.hpp"
+#include "ui.h"
 
 #include "esp_lcd_ili9341.h"
 
@@ -184,7 +185,7 @@ void app_main(void)
     gpio_config(&io_conf);
 
     init_spi_display();
-    app_main_display();
+    ui_setup();
     int cnt = 0;
     while(1) {
         printf("cnt: %d\n", cnt++);

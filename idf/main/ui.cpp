@@ -1,6 +1,5 @@
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
-#include <_types/_uint32_t.h>
 #include <src/lv_api_map_v8.h>
 #include <string>
 #include <array>
@@ -148,36 +147,10 @@ void ui_setup_styles()
 
 void ui_setup()
 {
-
+  lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0x003a57), LV_PART_MAIN);
   ui_setup_styles();
-
   screens::main::elements.screen = lv_obj_create(NULL);
   screens::main::setup(screens::main::elements);
 
-  lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0x003a57), LV_PART_MAIN);
-  /*Create a white label, set its text and align it to the center*/
-  lv_obj_t * label = lv_label_create(lv_screen_active());
-  lv_label_set_text(label, "Hello world");
-  lv_obj_set_style_text_color(lv_screen_active(), lv_color_hex(0xffffff), LV_PART_MAIN);
-  lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
   lv_screen_load_anim(screens::main::elements.screen, LV_SCR_LOAD_ANIM_OVER_LEFT, 100, 100, true);
-
-
-   /*Create an array for the points of the line*/
-    static lv_point_precise_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
-
-    /*Create style*/
-    static lv_style_t style_line;
-    lv_style_init(&style_line);
-    lv_style_set_line_width(&style_line, 8);
-    lv_style_set_line_color(&style_line, lv_palette_main(LV_PALETTE_BLUE));
-    lv_style_set_line_rounded(&style_line, true);
-
-    /*Create a line and apply the new style*/
-    lv_obj_t * line1;
-    line1 = lv_line_create(screens::main::elements.screen);
-    lv_line_set_points(line1, line_points, 5);     /*Set the points*/
-    lv_obj_add_style(line1, &style_line, 0);
-    lv_obj_center(line1);
-
 }
