@@ -12,7 +12,10 @@
 #include "esp_lcd_panel_io_interface.h"
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_ops.h"
+#include "misc/lv_color.h"
 #include "soc/gpio_num.h"
+#include "esp_lvgl_port.h"
+#include "lv_demos.h"
 
 
 #include <stdio.h>
@@ -35,28 +38,12 @@
 
 const char* TAG = "gameclock";
 
+static lv_display_t *lvgl_disp = NULL;
 
 extern "C" {
   void app_main(void);
   }
 
-
-static void test_draw_bitmap(esp_lcd_panel_handle_t panel_handle)
-{
-    uint16_t row_line = TFT_V_RES / TFT_BIT_PER_PIXEL;
-    uint8_t byte_per_pixel = TFT_BIT_PER_PIXEL / 8;
-    uint8_t *color = (uint8_t *)heap_caps_calloc(1, row_line * TFT_H_RES * byte_per_pixel, MALLOC_CAP_DMA);
-
-    for (int j = 0; j < TFT_BIT_PER_PIXEL; j++) {
-        for (int i = 0; i < row_line * TFT_H_RES; i++) {
-            for (int k = 0; k < byte_per_pixel; k++) {
-                color[i * byte_per_pixel + k] = (SPI_SWAP_DATA_TX(BIT(j), TFT_BIT_PER_PIXEL) >> (k * 8)) & 0xff;
-            }
-        }
-        ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(panel_handle, 0, j * row_line, TFT_H_RES, (j + 1) * row_line, color));
-    }
-    free(color);
-}
 
 void init_spi_display()
 {
@@ -111,7 +98,47 @@ void init_spi_display()
     ESP_ERROR_CHECK(esp_lcd_panel_mirror(panel_handle, true, true));
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
-    test_draw_bitmap(panel_handle);
+    const lvgl_port_cfg_t lvgl_cfg = ESP_LVGL_PORT_INIT_CONFIG();
+    ESP_ERROR_CHECK(lvgl_port_init(&lvgl_cfg));
+
+    uint32_t buff_size = TFT_H_RES * TFT_DRAW_BUFF_HEIGHT;;
+    const lvgl_port_display_cfg_t disp_cfg =
+    {
+      .io_handle = io_handle,
+      .panel_handle = panel_handle,
+     .buffer_size = buff_size,
+     .double_buffer = false,
+     .hres = TFT_H_RES,
+     .vres = TFT_V_RES,
+     .monochrome = false,
+     .rotation =
+         {
+             .swap_xy = false,
+             .mirror_x = true,
+             .mirror_y = false,
+         },
+     .color_format = LV_COLOR_FORMAT_NATIVE,
+     .flags = {
+         .buff_dma = false,
+         .buff_spiram = false,
+         .swap_bytes = true,
+         .full_refresh = false,
+        }
+    };
+    lvgl_disp = lvgl_port_add_disp(&disp_cfg);
+}
+
+static void app_main_display(void)
+{
+    lv_obj_t *scr = lv_scr_act();
+
+    /* Label */
+    lv_obj_t *label = lv_label_create(scr);
+    lv_obj_set_width(label, TFT_H_RES);
+    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_text(label, "Hello World!");
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 20);
+
 }
 
 void app_main(void)
@@ -132,11 +159,15 @@ void app_main(void)
     gpio_config(&io_conf);
 
     init_spi_display();
+    app_main_display();
     int cnt = 0;
     while(1) {
         printf("cnt: %d\n", cnt++);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         gpio_set_level((gpio_num_t)Red_LED, cnt % 2);
         gpio_set_level((gpio_num_t)Green_LED, cnt % 3);
+        lvgl_port_lock(0);
+        //lv_demo_music();
+        lvgl_port_unlock();
     }
 }

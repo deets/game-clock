@@ -11,5 +11,6 @@ constexpr auto TFT_BL = 21;
 
 constexpr auto TFT_H_RES = 240;
 constexpr auto TFT_V_RES = 320;
+constexpr auto TFT_DRAW_BUFF_HEIGHT = 100;
 constexpr auto TFT_BIT_PER_PIXEL = 16;
 constexpr auto TFT_HOST = SPI2_HOST;
