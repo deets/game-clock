@@ -1,3 +1,4 @@
+#include "core/lv_obj_pos.h"
 #include "cyd.hpp"
 
 #include "esp_lcd_ili9341.h"
@@ -12,6 +13,7 @@
 #include "esp_lcd_panel_io_interface.h"
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_ops.h"
+#include "misc/lv_area.h"
 #include "misc/lv_color.h"
 #include "soc/gpio_num.h"
 #include "esp_lvgl_port.h"
@@ -131,6 +133,29 @@ void init_spi_display()
 static void app_main_display(void)
 {
     lv_obj_t *scr = lv_scr_act();
+
+ /*Create an array for the points of the line*/
+    // Horizontal, top
+    //static lv_point_precise_t line_points[] = { {0, 1}, {TFT_H_RES, 1}};
+    // Horizontal, bottom
+    //static lv_point_precise_t line_points[] = { {0, TFT_V_RES - 2}, {TFT_H_RES, TFT_V_RES - 2}};
+    // Vertical, left
+    //static lv_point_precise_t line_points[] = { {1, 0}, {1, TFT_V_RES}};
+    // Vertical, right
+    static lv_point_precise_t line_points[] = { {TFT_H_RES - 2, 0}, {TFT_H_RES - 2, TFT_V_RES}};
+    /*Create style*/
+    static lv_style_t style_line;
+    lv_style_init(&style_line);
+    lv_style_set_line_width(&style_line, 8);
+    lv_style_set_line_color(&style_line, lv_palette_main(LV_PALETTE_BLUE));
+    lv_style_set_line_rounded(&style_line, true);
+
+    /*Create a line and apply the new style*/
+    lv_obj_t * line1;
+    line1 = lv_line_create(scr);
+    lv_line_set_points(line1, line_points, 2);
+    //lv_obj_add_style(line1, &style_line, 0);
+    lv_obj_align(line1, LV_ALIGN_TOP_LEFT, 0, 0);
 
     /* Label */
     lv_obj_t *label = lv_label_create(scr);
