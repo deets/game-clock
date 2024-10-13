@@ -1,9 +1,9 @@
 #include "lvgl.h"
 
+#include <initializer_list>
 #include <src/lv_api_map_v8.h>
-#include <string>
-#include <array>
 #include <iostream>
+#include <optional>
 
 extern "C" void ui_setup();
 
@@ -55,6 +55,11 @@ void screen_loaded_cb(lv_event_t * event)
 namespace main {
 
 struct Elements : public ScreenBase {
+  enum e_movement {
+    LEFT,
+    RIGHT,
+  };
+
   lv_obj_t *screen;
   lv_obj_t *replay;
   lv_obj_t *new_game;
@@ -65,14 +70,107 @@ struct Elements : public ScreenBase {
     {
       lv_obj_remove_state(button, LV_STATE_FOCUSED);
     }
+    lv_obj_add_state(settings, LV_STATE_DISABLED);
   }
 
   void key_pressed(uint32_t key) override {
     std::cout << "main::key_pressed:" << key << "\n";
+    switch(key)
+    {
+    case LV_KEY_RIGHT:
+      move(RIGHT, {replay, new_game, settings});
+      break;
+    case LV_KEY_LEFT:
+      move(LEFT, {replay, new_game, settings});
+      break;
+    case LV_KEY_ENTER:
+      break;
+    case LV_KEY_BACKSPACE:
+      break;
+    }
   }
-};
 
-Elements elements;
+  std::optional<ssize_t> selected(std::initializer_list<lv_obj_t*> items)
+  {
+    for(ssize_t i=0; i < items.size(); ++i)
+    {
+      if(lv_obj_get_state(*(items.begin() + i)) & LV_STATE_FOCUSED)
+      {
+        return i;
+      }
+    }
+    return std::nullopt;
+  }
+
+  std::optional<ssize_t> first_enabled(std::initializer_list<lv_obj_t*> items)
+  {
+    for(ssize_t i=0; i < items.size(); ++i)
+    {
+      if(!(lv_obj_get_state(*(items.begin() + i)) & LV_STATE_DISABLED))
+      {
+        return i;
+      }
+    }
+    return std::nullopt;
+  }
+
+  void move(e_movement movement, std::initializer_list<lv_obj_t*> items)
+  {
+    auto index = selected(items);
+    if(index)
+    {
+      switch(movement)
+      {
+      case LEFT:
+        if(*index > 0)
+        {
+          for(auto i = *index - 1; i >= 0; --i)
+          {
+            if(!(lv_obj_get_state(*(items.begin() + i)) & LV_STATE_DISABLED))
+            {
+              index = i;
+              break;
+            }
+          }
+        }
+        break;
+      case RIGHT:
+        if(*index < items.size() - 1)
+        {
+          for(auto i = *index + 1; i < items.size(); ++i)
+          {
+            if(!(lv_obj_get_state(*(items.begin() + i)) & LV_STATE_DISABLED))
+            {
+              index = i;
+              break;
+            }
+          }
+        }
+
+        break;
+      }
+    }
+    else
+    {
+      index = first_enabled(items);
+    }
+    if(index)
+    {
+      for(ssize_t i=0; i < items.size(); ++i)
+      {
+        if(i != *index)
+        {
+          lv_obj_remove_state(*(items.begin() + i), LV_STATE_FOCUSED);
+        }
+        else
+        {
+          lv_obj_add_state(*(items.begin() + i), LV_STATE_FOCUSED);
+        }
+      }
+    }
+  }
+
+} elements;
 
 void setup_button(lv_obj_t* button, const char* text)
 {
