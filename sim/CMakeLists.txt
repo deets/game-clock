@@ -36,14 +36,17 @@ target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR} ${SDL2_INCLUDE_DIRS
 
 # Create the main executable and add source files
 add_executable(game-clock
-    ${PROJECT_SOURCE_DIR}/game-clock/main.c
-    ${PROJECT_SOURCE_DIR}/../idf/main/ui.cpp
-    ${PROJECT_SOURCE_DIR}/game-clock/freertos_main.cpp
-    ${PROJECT_SOURCE_DIR}/game-clock/mouse_cursor_icon.c
-    ${PROJECT_SOURCE_DIR}/game-clock/FreeRTOS_Posix_Port.c
-  )
+  ${PROJECT_SOURCE_DIR}/game-clock/main.c
+  # This shows how to pull in sources from the IDF project
+  ${PROJECT_SOURCE_DIR}/../idf/main/ui.cpp
+  ${PROJECT_SOURCE_DIR}/game-clock/freertos_main.cpp
+  ${PROJECT_SOURCE_DIR}/game-clock/mouse_cursor_icon.c
+  ${PROJECT_SOURCE_DIR}/game-clock/FreeRTOS_Posix_Port.c
+)
 
+# Allow for includes from the IDF project
 target_include_directories(game-clock PRIVATE ${PROJECT_SOURCE_DIR}/../idf/main)
+
 # Define LVGL configuration as a simple include
 target_compile_definitions(game-clock PRIVATE LV_CONF_INCLUDE_SIMPLE)
 target_link_libraries(game-clock lvgl lvgl::examples lvgl::demos lvgl::thorvg ${SDL2_LIBRARIES} m pthread)

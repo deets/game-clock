@@ -5,9 +5,16 @@ where you can configure different modes (count down, count down with
 reset, count up), list of players, and then use cheap 433MHz buttons
 to trigger active player changes.
 
-** TODO Hardware
+** Requirements
 
- - [[https://randomnerdtutorials.com/cheap-yellow-display-esp32-2432s028r/][Cheay Yellow Display]] is the main component showing the UI and
+*** Software
+
+ - IDF v5.3
+ - SDL2 (on macOS I use homebrew, Linux should just work with a =-dev=-package).
+
+*** TODO Hardware
+
+ - [[https://randomnerdtutorials.com/cheap-yellow-display-esp32-2432s028r/][Cheap Yellow Display]] is the main component showing the UI and
    running the domain logic.
  - 433MHz RX TBD
  - 433MHz button TBD
@@ -20,7 +27,8 @@ result.
 
 To this end the [[file:sim][sim]] project is setup to simulate the UI based on the
 =SDL2= library. The actual LVGL source code is pulled in from the
-installed LVGL component for the IDF project.
+installed LVGL component for the IDF project, as are the projects UI
+cpp files.
 
 *Attention*: this is done using a symlink! Those work only under unixy
  OS such as Linux and macOS. To make them work under Windows, copying
@@ -28,4 +36,4 @@ installed LVGL component for the IDF project.
  option.
 
 To build, just run =cmake -B build && cmake --build build= inside the
-respective directory. You should end up with =bin/game-clock= to run.
+directory. You should end up with =bin/game-clock= to run.
