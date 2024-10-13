@@ -1,0 +1,31 @@
+* Game Clock
+
+This project aims to provide a multiplayer chess-clock like device
+where you can configure different modes (count down, count down with
+reset, count up), list of players, and then use cheap 433MHz buttons
+to trigger active player changes.
+
+** TODO Hardware
+
+ - [[https://randomnerdtutorials.com/cheap-yellow-display-esp32-2432s028r/][Cheay Yellow Display]] is the main component showing the UI and
+   running the domain logic.
+ - 433MHz RX TBD
+ - 433MHz button TBD
+
+** LVGL simulator
+
+[[https://docs.lvgl.io/master/][LVGL]] is a pretty neat small devices UI framework. As usual with
+GUI-projects, tweaking and iterating quickly is paramount to a good
+result.
+
+To this end the [[file:sim][sim]] project is setup to simulate the UI based on the
+=SDL2= library. The actual LVGL source code is pulled in from the
+installed LVGL component for the IDF project.
+
+*Attention*: this is done using a symlink! Those work only under unixy
+ OS such as Linux and macOS. To make them work under Windows, copying
+ over the source from the component directory is probably the simplest
+ option.
+
+To build, just run =cmake -B build && cmake --build build= inside the
+respective directory. You should end up with =bin/game-clock= to run.
